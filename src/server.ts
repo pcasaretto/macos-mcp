@@ -1,4 +1,4 @@
-import { Effect, Layer } from 'effect'
+import { Effect } from 'effect'
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
@@ -7,16 +7,8 @@ import {
   type CallToolResult,
   type Tool
 } from '@modelcontextprotocol/sdk/types.js'
-import { NotificationServiceLive, NotificationService } from './services/notification.js'
-import { ClipboardServiceLive, ClipboardService } from './services/clipboard.js'
-import { ExecutorServiceLive, ExecutorService } from './services/executor.js'
-import { handleNotifyTool } from './tools/notify.js'
-import { handleCheckEnvironmentTool } from './tools/check-env.js'
-import { handleCopyClipboardTool } from './tools/clipboard/copy.js'
-import { handlePasteClipboardTool } from './tools/clipboard/paste.js'
-import { handleClearClipboardTool } from './tools/clipboard/clear.js'
-import { notifyInputToJsonSchema } from './schemas/notify.js'
-import { clipboardCopyInputToJsonSchema, clipboardPasteInputToJsonSchema, clipboardClearInputToJsonSchema } from './schemas/clipboard.js'
+import { toolRegistry, findTool } from './tools/index.js'
+import { AppServiceLayer } from './services/layer.js'
 
 const createMCPServer = Effect.gen(function* (_) {
   const server = new Server(
@@ -31,37 +23,12 @@ const createMCPServer = Effect.gen(function* (_) {
     }
   )
 
-  const tools: Tool[] = [
-    {
-      name: 'notify',
-      description: 'Display a macOS notification via AppleScript',
-      inputSchema: notifyInputToJsonSchema()
-    },
-    {
-      name: 'checkEnvironment',
-      description: 'Check if the environment supports macOS notifications',
-      inputSchema: {
-        type: 'object',
-        properties: {},
-        required: []
-      }
-    },
-    {
-      name: 'clipboard.copy',
-      description: 'Copy text to the macOS clipboard',
-      inputSchema: clipboardCopyInputToJsonSchema()
-    },
-    {
-      name: 'clipboard.paste',
-      description: 'Get current text from the macOS clipboard',
-      inputSchema: clipboardPasteInputToJsonSchema()
-    },
-    {
-      name: 'clipboard.clear',
-      description: 'Clear the macOS clipboard',
-      inputSchema: clipboardClearInputToJsonSchema()
-    }
-  ]
+  // Convert registry tools to MCP format
+  const tools: Tool[] = toolRegistry.allTools.map(tool => ({
+    name: tool.name,
+    description: tool.description,
+    inputSchema: tool.inputSchema
+  }))
 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
     tools
@@ -70,25 +37,25 @@ const createMCPServer = Effect.gen(function* (_) {
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params
 
-    const handleTool = (name: string, args: unknown): Effect.Effect<CallToolResult, Error, NotificationService | ClipboardService> => {
-      switch (name) {
-        case 'notify':
-          return handleNotifyTool(args)
-        case 'checkEnvironment':
-          return handleCheckEnvironmentTool()
-        case 'clipboard.copy':
-          return handleCopyClipboardTool(args)
-        case 'clipboard.paste':
-          return handlePasteClipboardTool()
-        case 'clipboard.clear':
-          return handleClearClipboardTool()
-        default:
-          return Effect.fail(new Error(`Unknown tool: ${name}`))
+    // Find and execute tool from registry
+    const tool = findTool(toolRegistry, name)
+    if (!tool) {
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({
+              error: `Unknown tool: ${name}`,
+              tool: name
+            }, null, 2)
+          }
+        ],
+        isError: true
       }
     }
 
     const result = await Effect.runPromise(
-      handleTool(name, args).pipe(
+      tool.handler(args).pipe(
         Effect.catchAll((error) =>
           Effect.succeed({
             content: [
@@ -103,7 +70,7 @@ const createMCPServer = Effect.gen(function* (_) {
             isError: true
           })
         ),
-        Effect.provide(Layer.merge(NotificationServiceLive, ClipboardServiceLive.pipe(Layer.provide(ExecutorServiceLive))))
+        Effect.provide(AppServiceLayer)
       )
     )
     
@@ -129,7 +96,7 @@ export const runServer = Effect.gen(function* (_) {
     server.close().catch(console.error)
   })
 }).pipe(
-  Effect.provide(Layer.merge(NotificationServiceLive, ClipboardServiceLive.pipe(Layer.provide(ExecutorServiceLive)))),
+  Effect.provide(AppServiceLayer),
   Effect.catchAll((error) => 
     Effect.sync(() => {
       console.error('Server error:', error)
