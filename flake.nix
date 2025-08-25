@@ -11,34 +11,29 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
         nodejs = pkgs.nodejs_20;
+        
+        # Import node2nix generated packages
+        nodePackages = import ./default.nix {
+          inherit pkgs system nodejs;
+        };
       in
       {
         packages = {
-          default = pkgs.stdenv.mkDerivation {
-            name = "mcp-macos-notify";
-            version = "0.1.0";
-            
+          default = nodePackages.package.override {
             src = ./.;
             
-            nativeBuildInputs = with pkgs; [ nodejs nodePackages.npm ];
+            buildInputs = [ nodejs ];
             
-            buildPhase = ''
+            postInstall = ''
+              # Build TypeScript
               export HOME=$TMPDIR
-              export npm_config_cache=$TMPDIR/.npm
-              npm ci
               npm run build
-            '';
-            
-            installPhase = ''
-              mkdir -p $out/bin
-              cp -r dist $out/
-              cp -r node_modules $out/
-              cp package.json $out/
               
-              # Create executable wrapper
+              # Create executable that bundles Node.js
+              mkdir -p $out/bin
               cat > $out/bin/mcp-macos-notify << 'EOF'
             #!/bin/sh
-            exec ${nodejs}/bin/node $out/dist/index.js "$@"
+            exec ${nodejs}/bin/node $out/lib/node_modules/mcp-macos-notify/dist/index.js "$@"
             EOF
               chmod +x $out/bin/mcp-macos-notify
             '';
@@ -57,6 +52,7 @@
             buildInputs = with pkgs; [
               nodejs_20
               nodePackages.npm
+              nodePackages.node2nix
               nodePackages.typescript-language-server
               nodePackages.typescript
               jq
@@ -68,16 +64,16 @@
               echo "NPM version: $(npm --version)"
               echo ""
               echo "Available commands:"
-              echo "  npm install       - Install dependencies"
-              echo "  npm run dev       - Run in development mode" 
-              echo "  npm test          - Run tests"
-              echo "  npm run build     - Build for production"
-              echo "  nix build         - Build Nix package"
-              echo "  nix run           - Run the server"
+              echo "  npm install         - Install dependencies"
+              echo "  npm run dev         - Run in development mode" 
+              echo "  npm test            - Run tests"
+              echo "  npm run build       - Build for production"
+              echo "  node2nix -l         - Regenerate node2nix files"
+              echo "  nix build           - Build portable binary"
+              echo "  nix run             - Run the server"
               echo ""
-              echo "Usage:"
-              echo "  # For Claude Desktop, use: nix run /path/to/this/project"
-              echo "  # Or use the built binary: ./result/bin/mcp-macos-notify"
+              echo "Usage for Claude Desktop:"
+              echo '  "command": "nix", "args": ["run", "${toString ./.}"]'
             '';
           };
         };
