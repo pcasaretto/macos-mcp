@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(nix develop:*)",
+      "Bash(/usr/bin/osascript:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

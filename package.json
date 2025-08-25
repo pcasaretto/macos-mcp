@@ -1,0 +1,47 @@
+{
+  "name": "mcp-macos-notify",
+  "version": "0.1.0",
+  "description": "MCP server for macOS notifications via AppleScript",
+  "type": "module",
+  "main": "./dist/index.js",
+  "bin": {
+    "mcp-macos-notify": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "tsx --watch src/index.ts",
+    "build": "tsup",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "mcp",
+    "macos",
+    "notifications",
+    "applescript",
+    "effect"
+  ],
+  "author": "Paulo Casaretto",
+  "license": "MIT",
+  "dependencies": {
+    "@effect/schema": "^0.75.4",
+    "@modelcontextprotocol/sdk": "^1.0.2",
+    "effect": "^3.9.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.8.7",
+    "eslint": "^9.14.0",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
