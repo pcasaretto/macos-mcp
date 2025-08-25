@@ -1,6 +1,9 @@
 import { Context, Effect, Layer } from 'effect'
-import { ExecutorService } from './executor.js'
+import { execFile } from 'child_process'
+import { promisify } from 'util'
 import type { ClipboardCopyOutput, ClipboardPasteOutput, ClipboardClearOutput } from '../schemas/clipboard.js'
+
+const execFileAsync = promisify(execFile)
 
 export interface ClipboardService {
   readonly copyText: (text: string) => Effect.Effect<ClipboardCopyOutput>
@@ -11,7 +14,6 @@ export interface ClipboardService {
 export const ClipboardService = Context.GenericTag<ClipboardService>('ClipboardService')
 
 const createClipboardServiceLive = Effect.gen(function* (_) {
-  const executor = yield* _(ExecutorService)
 
   const copyText = (text: string): Effect.Effect<ClipboardCopyOutput> =>
     Effect.gen(function* (_) {
@@ -24,7 +26,10 @@ const createClipboardServiceLive = Effect.gen(function* (_) {
       }
 
       const result = yield* _(
-        executor.executePbcopy(text).pipe(
+        Effect.tryPromise({
+          try: () => execFileAsync('sh', ['-c', `printf %s ${JSON.stringify(text)} | pbcopy`]),
+          catch: (error) => error as Error
+        }).pipe(
           Effect.catchAll((error) =>
             Effect.succeed({
               success: false,
@@ -56,7 +61,10 @@ const createClipboardServiceLive = Effect.gen(function* (_) {
       }
 
       const result = yield* _(
-        executor.executePbpaste().pipe(
+        Effect.tryPromise({
+          try: () => execFileAsync('pbpaste', []),
+          catch: (error) => error as Error
+        }).pipe(
           Effect.catchAll((error) =>
             Effect.succeed({
               success: false,
@@ -89,7 +97,10 @@ const createClipboardServiceLive = Effect.gen(function* (_) {
       }
 
       const result = yield* _(
-        executor.executePbcopy('').pipe(
+        Effect.tryPromise({
+          try: () => execFileAsync('sh', ['-c', `printf %s '' | pbcopy`]),
+          catch: (error) => error as Error
+        }).pipe(
           Effect.catchAll((error) =>
             Effect.succeed({
               success: false,

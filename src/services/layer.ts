@@ -1,15 +1,13 @@
 import { Layer } from 'effect'
 import { NotificationServiceLive } from './notification.js'
 import { ClipboardServiceLive } from './clipboard.js'
-import { ExecutorServiceLive } from './executor.js'
 
 /**
  * Central application layer that provides all services
  * 
- * This layer combines all services with their dependencies resolved:
- * - ExecutorService: Foundation for command execution
- * - ClipboardService: Requires ExecutorService
- * - NotificationService: Standalone service
+ * This layer combines all services:
+ * - ClipboardService: Handles clipboard operations
+ * - NotificationService: Handles system notifications
  * 
  * New services can be added here and will automatically be available
  * to all tools through dependency injection.
@@ -17,8 +15,6 @@ import { ExecutorServiceLive } from './executor.js'
 export const AppServiceLayer = Layer.merge(
   NotificationServiceLive,
   ClipboardServiceLive
-).pipe(
-  Layer.provide(ExecutorServiceLive)
 )
 
 /**
