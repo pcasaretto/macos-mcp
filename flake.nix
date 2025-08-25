@@ -10,47 +10,45 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        
-        # Simple package that just runs the built dist/index.js
-        package = pkgs.stdenv.mkDerivation {
-          name = "mcp-macos-notify";
-          version = "0.1.0";
-          
-          src = ./.;
-          
-          buildInputs = with pkgs; [ nodejs_20 nodePackages.npm ];
-          
-          buildPhase = ''
-            export HOME=$TMPDIR
-            npm ci --cache $TMPDIR/.npm
-            npm run build
-          '';
-          
-          installPhase = ''
-            mkdir -p $out/bin $out/lib
-            cp -r dist $out/lib/
-            cp -r node_modules $out/lib/
-            cp package.json $out/lib/
-            
-            # Create wrapper script
-            cat > $out/bin/mcp-macos-notify << 'EOF'
-            #!/bin/sh
-            exec ${pkgs.nodejs_20}/bin/node $out/lib/dist/index.js "$@"
-            EOF
-            chmod +x $out/bin/mcp-macos-notify
-          '';
-        };
+        nodejs = pkgs.nodejs_20;
       in
       {
         packages = {
-          default = package;
-          mcp-macos-notify = package;
+          default = pkgs.stdenv.mkDerivation {
+            name = "mcp-macos-notify";
+            version = "0.1.0";
+            
+            src = ./.;
+            
+            nativeBuildInputs = with pkgs; [ nodejs nodePackages.npm ];
+            
+            buildPhase = ''
+              export HOME=$TMPDIR
+              export npm_config_cache=$TMPDIR/.npm
+              npm ci
+              npm run build
+            '';
+            
+            installPhase = ''
+              mkdir -p $out/bin
+              cp -r dist $out/
+              cp -r node_modules $out/
+              cp package.json $out/
+              
+              # Create executable wrapper
+              cat > $out/bin/mcp-macos-notify << 'EOF'
+            #!/bin/sh
+            exec ${nodejs}/bin/node $out/dist/index.js "$@"
+            EOF
+              chmod +x $out/bin/mcp-macos-notify
+            '';
+          };
         };
 
         apps = {
           default = {
             type = "app";
-            program = "${package}/bin/mcp-macos-notify";
+            program = "${self.packages.${system}.default}/bin/mcp-macos-notify";
           };
         };
 
@@ -62,7 +60,6 @@
               nodePackages.typescript-language-server
               nodePackages.typescript
               jq
-              just
             ];
             
             shellHook = ''
@@ -71,12 +68,16 @@
               echo "NPM version: $(npm --version)"
               echo ""
               echo "Available commands:"
-              echo "  npm install  - Install dependencies"
-              echo "  npm run dev  - Run in development mode"
-              echo "  npm test     - Run tests"
-              echo "  npm run build - Build for production"
-              echo "  nix build    - Build Nix package"
-              echo "  nix run      - Run the server"
+              echo "  npm install       - Install dependencies"
+              echo "  npm run dev       - Run in development mode" 
+              echo "  npm test          - Run tests"
+              echo "  npm run build     - Build for production"
+              echo "  nix build         - Build Nix package"
+              echo "  nix run           - Run the server"
+              echo ""
+              echo "Usage:"
+              echo "  # For Claude Desktop, use: nix run /path/to/this/project"
+              echo "  # Or use the built binary: ./result/bin/mcp-macos-notify"
             '';
           };
         };
