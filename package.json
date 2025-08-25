@@ -1,11 +1,11 @@
 {
-  "name": "mcp-macos-notify",
+  "name": "mcp-macos",
   "version": "0.1.0",
-  "description": "MCP server for macOS notifications via AppleScript",
+  "description": "MCP server for macOS system integration via AppleScript",
   "type": "module",
   "main": "./dist/index.js",
   "bin": {
-    "mcp-macos-notify": "./dist/index.js"
+    "mcp-macos": "./dist/index.js"
   },
   "files": [
     "dist"
@@ -13,7 +13,7 @@
   "scripts": {
     "dev": "tsx --watch src/index.ts",
     "build": "tsup",
-    "build:binary": "npm run build && pkg dist/index.js --target node20-macos-x64 --output mcp-macos-notify",
+    "build:binary": "npm run build && pkg dist/index.js --target node20-macos-x64 --output mcp-macos",
     "test": "vitest",
     "test:run": "vitest run",
     "typecheck": "tsc --noEmit",
@@ -23,8 +23,10 @@
   "keywords": [
     "mcp",
     "macos",
-    "notifications",
+    "system",
+    "automation",
     "applescript",
+    "notifications",
     "effect"
   ],
   "author": "Paulo Casaretto",

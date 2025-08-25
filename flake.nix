@@ -1,5 +1,5 @@
 {
-  description = "MCP server for macOS notifications via AppleScript";
+  description = "MCP server for macOS system integration via AppleScript";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
@@ -31,11 +31,11 @@
               
               # Create executable that bundles Node.js
               mkdir -p $out/bin
-              cat > $out/bin/mcp-macos-notify << 'EOF'
+              cat > $out/bin/mcp-macos << EOF
             #!/bin/sh
-            exec ${nodejs}/bin/node $out/lib/node_modules/mcp-macos-notify/dist/index.js "$@"
+            exec ${nodejs}/bin/node $out/lib/node_modules/mcp-macos/dist/index.js "\$@"
             EOF
-              chmod +x $out/bin/mcp-macos-notify
+              chmod +x $out/bin/mcp-macos
             '';
           };
         };
@@ -43,7 +43,7 @@
         apps = {
           default = {
             type = "app";
-            program = "${self.packages.${system}.default}/bin/mcp-macos-notify";
+            program = "${self.packages.${system}.default}/bin/mcp-macos";
           };
         };
 
@@ -59,7 +59,7 @@
             ];
             
             shellHook = ''
-              echo "🚀 MCP macOS Notify development environment"
+              echo "🚀 MCP macOS development environment"
               echo "Node.js version: $(node --version)"
               echo "NPM version: $(npm --version)"
               echo ""

@@ -15,7 +15,7 @@ import { notifyInputToJsonSchema } from './schemas/notify.js'
 const createMCPServer = Effect.gen(function* (_) {
   const server = new Server(
     {
-      name: 'mcp-macos-notify',
+      name: 'mcp-macos',
       version: '0.1.0',
     },
     {

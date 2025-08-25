@@ -1,6 +1,6 @@
-# MCP macOS Notify
+# MCP macOS
 
-A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that provides macOS notification capabilities to LLMs via AppleScript. Built with [Effect TS](https://effect.website/) for robust error handling and resource management.
+A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that provides macOS system integration capabilities to LLMs via AppleScript. Built with [Effect TS](https://effect.website/) for robust error handling and resource management.
 
 ## Features
 
@@ -123,7 +123,7 @@ Add to your Claude Desktop configuration file:
 {
   "mcpServers": {
     "macos-notify": {
-      "command": "/path/to/mcp-macos-notify",
+      "command": "/path/to/mcp-macos",
       "args": []
     }
   }
@@ -151,7 +151,7 @@ Test the server interactively:
 npm install -g @modelcontextprotocol/inspector
 
 # Run with built binary
-npx @modelcontextprotocol/inspector /path/to/mcp-macos-notify
+npx @modelcontextprotocol/inspector /path/to/mcp-macos
 
 # Or with Nix
 npx @modelcontextprotocol/inspector nix run /path/to/macos-mcp#default
@@ -284,12 +284,12 @@ All operations use Effect TS for structured error handling:
 
 Enable verbose logging:
 ```bash
-DEBUG=1 ./mcp-macos-notify
+DEBUG=1 ./mcp-macos
 ```
 
 Test notification manually:
 ```bash
-echo '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"notify","arguments":{"title":"Test","message":"Hello World"}},"id":1}' | ./mcp-macos-notify
+echo '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"notify","arguments":{"title":"Test","message":"Hello World"}},"id":1}' | ./mcp-macos
 ```
 
 ## License

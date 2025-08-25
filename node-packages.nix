@@ -1626,8 +1626,8 @@ let
     };
   };
   args = {
-    name = "mcp-macos-notify";
-    packageName = "mcp-macos-notify";
+    name = "mcp-macos";
+    packageName = "mcp-macos";
     version = "0.1.0";
     src = ./.;
     dependencies = [
@@ -1839,7 +1839,7 @@ let
     ];
     buildInputs = globalBuildInputs;
     meta = {
-      description = "MCP server for macOS notifications via AppleScript";
+      description = "MCP server for macOS system integration via AppleScript";
       license = "MIT";
     };
     production = true;
