@@ -51,10 +51,10 @@
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
               nodejs_20
-              nodePackages.npm
-              nodePackages.node2nix
-              nodePackages.typescript-language-server
-              nodePackages.typescript
+              pkgs.nodePackages.npm
+              pkgs.nodePackages.node2nix
+              pkgs.nodePackages.typescript-language-server
+              pkgs.nodePackages.typescript
               jq
             ];
             

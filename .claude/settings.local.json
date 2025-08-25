@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(nix develop:*)",
-      "Bash(/usr/bin/osascript:*)"
+      "Bash(/usr/bin/osascript:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
