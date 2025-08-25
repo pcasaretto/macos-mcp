@@ -8,9 +8,15 @@ import {
   type Tool
 } from '@modelcontextprotocol/sdk/types.js'
 import { NotificationServiceLive, NotificationService } from './services/notification.js'
+import { ClipboardServiceLive, ClipboardService } from './services/clipboard.js'
+import { ExecutorServiceLive, ExecutorService } from './services/executor.js'
 import { handleNotifyTool } from './tools/notify.js'
 import { handleCheckEnvironmentTool } from './tools/check-env.js'
+import { handleCopyClipboardTool } from './tools/clipboard/copy.js'
+import { handlePasteClipboardTool } from './tools/clipboard/paste.js'
+import { handleClearClipboardTool } from './tools/clipboard/clear.js'
 import { notifyInputToJsonSchema } from './schemas/notify.js'
+import { clipboardCopyInputToJsonSchema, clipboardPasteInputToJsonSchema, clipboardClearInputToJsonSchema } from './schemas/clipboard.js'
 
 const createMCPServer = Effect.gen(function* (_) {
   const server = new Server(
@@ -39,6 +45,21 @@ const createMCPServer = Effect.gen(function* (_) {
         properties: {},
         required: []
       }
+    },
+    {
+      name: 'clipboard.copy',
+      description: 'Copy text to the macOS clipboard',
+      inputSchema: clipboardCopyInputToJsonSchema()
+    },
+    {
+      name: 'clipboard.paste',
+      description: 'Get current text from the macOS clipboard',
+      inputSchema: clipboardPasteInputToJsonSchema()
+    },
+    {
+      name: 'clipboard.clear',
+      description: 'Clear the macOS clipboard',
+      inputSchema: clipboardClearInputToJsonSchema()
     }
   ]
 
@@ -49,12 +70,18 @@ const createMCPServer = Effect.gen(function* (_) {
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params
 
-    const handleTool = (name: string, args: unknown): Effect.Effect<CallToolResult, Error, NotificationService> => {
+    const handleTool = (name: string, args: unknown): Effect.Effect<CallToolResult, Error, NotificationService | ClipboardService> => {
       switch (name) {
         case 'notify':
           return handleNotifyTool(args)
         case 'checkEnvironment':
           return handleCheckEnvironmentTool()
+        case 'clipboard.copy':
+          return handleCopyClipboardTool(args)
+        case 'clipboard.paste':
+          return handlePasteClipboardTool()
+        case 'clipboard.clear':
+          return handleClearClipboardTool()
         default:
           return Effect.fail(new Error(`Unknown tool: ${name}`))
       }
@@ -76,7 +103,7 @@ const createMCPServer = Effect.gen(function* (_) {
             isError: true
           })
         ),
-        Effect.provide(NotificationServiceLive)
+        Effect.provide(Layer.merge(NotificationServiceLive, ClipboardServiceLive.pipe(Layer.provide(ExecutorServiceLive))))
       )
     )
     
@@ -102,7 +129,7 @@ export const runServer = Effect.gen(function* (_) {
     server.close().catch(console.error)
   })
 }).pipe(
-  Effect.provide(NotificationServiceLive),
+  Effect.provide(Layer.merge(NotificationServiceLive, ClipboardServiceLive.pipe(Layer.provide(ExecutorServiceLive)))),
   Effect.catchAll((error) => 
     Effect.sync(() => {
       console.error('Server error:', error)

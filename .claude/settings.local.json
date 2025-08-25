@@ -4,7 +4,9 @@
       "Bash(nix develop:*)",
       "Bash(/usr/bin/osascript:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "mcp__macos-notify__notify",
+      "Bash(pbpaste)"
     ],
     "deny": [],
     "ask": []
