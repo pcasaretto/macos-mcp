@@ -7,7 +7,7 @@ import {
   type CallToolResult,
   type Tool
 } from '@modelcontextprotocol/sdk/types.js'
-import { NotificationServiceLive } from './services/notification.js'
+import { NotificationServiceLive, NotificationService } from './services/notification.js'
 import { handleNotifyTool } from './tools/notify.js'
 import { handleCheckEnvironmentTool } from './tools/check-env.js'
 import { notifyInputToJsonSchema } from './schemas/notify.js'
@@ -49,7 +49,7 @@ const createMCPServer = Effect.gen(function* (_) {
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params
 
-    const handleTool = (name: string, args: unknown): Effect.Effect<CallToolResult, Error> => {
+    const handleTool = (name: string, args: unknown): Effect.Effect<CallToolResult, Error, NotificationService> => {
       switch (name) {
         case 'notify':
           return handleNotifyTool(args)
@@ -60,13 +60,13 @@ const createMCPServer = Effect.gen(function* (_) {
       }
     }
 
-    return yield* _(
+    const result = await Effect.runPromise(
       handleTool(name, args).pipe(
         Effect.catchAll((error) =>
           Effect.succeed({
             content: [
               {
-                type: 'text',
+                type: 'text' as const,
                 text: JSON.stringify({
                   error: error.message,
                   tool: name
@@ -75,9 +75,12 @@ const createMCPServer = Effect.gen(function* (_) {
             ],
             isError: true
           })
-        )
+        ),
+        Effect.provide(NotificationServiceLive)
       )
     )
+    
+    return result
   })
 
   return server

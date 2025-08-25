@@ -82,7 +82,9 @@ describe('MCP Tools', () => {
       expect(result.isError).toBe(true)
       
       const content = JSON.parse(result.content[0].text)
+      expect(content.success).toBe(false)
       expect(content.error).toContain('Invalid input for notify tool')
+      expect(content.details).toBe('Input validation failed')
     })
 
     it('should handle input with all optional fields', async () => {

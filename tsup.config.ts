@@ -10,9 +10,6 @@ export default defineConfig({
   minify: false,
   bundle: true,
   shims: true,
-  banner: {
-    js: '#!/usr/bin/env node'
-  },
   esbuildOptions: (options) => {
     options.platform = 'node'
     options.packages = 'external'

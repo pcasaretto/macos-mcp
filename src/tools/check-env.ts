@@ -2,7 +2,7 @@ import { Effect } from 'effect'
 import { type CallToolResult } from '@modelcontextprotocol/sdk/types.js'
 import { NotificationService } from '../services/notification.js'
 
-export const handleCheckEnvironmentTool = (): Effect.Effect<CallToolResult, Error> =>
+export const handleCheckEnvironmentTool = (): Effect.Effect<CallToolResult, Error, NotificationService> =>
   Effect.gen(function* (_) {
     const notificationService = yield* _(NotificationService)
     
@@ -11,7 +11,7 @@ export const handleCheckEnvironmentTool = (): Effect.Effect<CallToolResult, Erro
     return {
       content: [
         {
-          type: 'text',
+          type: 'text' as const,
           text: JSON.stringify({
             environment: {
               ok: result.ok,

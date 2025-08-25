@@ -27,29 +27,29 @@ export type CheckEnvironmentOutput = typeof CheckEnvironmentOutputSchema.Type
 
 export const notifyInputToJsonSchema = () => {
   return {
-    type: 'object',
+    type: 'object' as const,
     properties: {
       title: {
-        type: 'string',
+        type: 'string' as const,
         description: 'The title of the notification'
       },
       message: {
-        type: 'string', 
+        type: 'string' as const, 
         description: 'The main notification message'
       },
       subtitle: {
-        type: 'string',
+        type: 'string' as const,
         description: 'Optional subtitle for the notification'
       },
       sound: {
-        type: 'string',
+        type: 'string' as const,
         description: 'Optional sound name to play with the notification'
       },
       group: {
-        type: 'string',
+        type: 'string' as const,
         description: 'Optional group identifier for notification coalescing'
       }
     },
-    required: ['title', 'message']
-  } as const
+    required: ['title', 'message'] as string[]
+  }
 }

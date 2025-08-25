@@ -4,27 +4,41 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     flake-utils.url = "github:numtide/flake-utils";
-    dream2nix = {
-      url = "github:nix-community/dream2nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
-  outputs = { self, nixpkgs, flake-utils, dream2nix }:
+  outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        dream2nixLib = dream2nix.lib.init {
-          pkgs = pkgs;
-          config.projectRoot = ./.;
-        };
         
-        # Build the Node.js project using dream2nix
-        package = dream2nixLib.buildPackageFromPackageJson {
-          source = ./.;
-          packageJson = ./package.json;
-          packageLockJson = ./package-lock.json;
-          nodejs = pkgs.nodejs_20;
+        # Simple package that just runs the built dist/index.js
+        package = pkgs.stdenv.mkDerivation {
+          name = "mcp-macos-notify";
+          version = "0.1.0";
+          
+          src = ./.;
+          
+          buildInputs = with pkgs; [ nodejs_20 nodePackages.npm ];
+          
+          buildPhase = ''
+            export HOME=$TMPDIR
+            npm ci --cache $TMPDIR/.npm
+            npm run build
+          '';
+          
+          installPhase = ''
+            mkdir -p $out/bin $out/lib
+            cp -r dist $out/lib/
+            cp -r node_modules $out/lib/
+            cp package.json $out/lib/
+            
+            # Create wrapper script
+            cat > $out/bin/mcp-macos-notify << 'EOF'
+            #!/bin/sh
+            exec ${pkgs.nodejs_20}/bin/node $out/lib/dist/index.js "$@"
+            EOF
+            chmod +x $out/bin/mcp-macos-notify
+          '';
         };
       in
       {
@@ -61,6 +75,8 @@
               echo "  npm run dev  - Run in development mode"
               echo "  npm test     - Run tests"
               echo "  npm run build - Build for production"
+              echo "  nix build    - Build Nix package"
+              echo "  nix run      - Run the server"
             '';
           };
         };

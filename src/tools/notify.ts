@@ -4,26 +4,44 @@ import { CallToolRequestSchema, type CallToolResult } from '@modelcontextprotoco
 import { NotificationService } from '../services/notification.js'
 import { NotifyInputSchema } from '../schemas/notify.js'
 
-export const handleNotifyTool = (args: unknown): Effect.Effect<CallToolResult, Error> =>
+export const handleNotifyTool = (args: unknown): Effect.Effect<CallToolResult, Error, NotificationService> =>
   Effect.gen(function* (_) {
     const notificationService = yield* _(NotificationService)
     
-    const parsedInput = yield* _(
+    const parsedInputResult = yield* _(
       Effect.try(() => Schema.decodeUnknownSync(NotifyInputSchema)(args))
         .pipe(
           Effect.mapError(error => 
             new Error(`Invalid input for notify tool: ${error}`)
-          )
+          ),
+          Effect.either
         )
     )
 
+    if (parsedInputResult._tag === 'Left') {
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({
+              success: false,
+              error: parsedInputResult.left.message,
+              details: 'Input validation failed'
+            }, null, 2)
+          }
+        ],
+        isError: true
+      }
+    }
+
+    const parsedInput = parsedInputResult.right
     const result = yield* _(notificationService.sendNotification(parsedInput))
 
     if (result.ok) {
       return {
         content: [
           {
-            type: 'text',
+            type: 'text' as const,
             text: JSON.stringify({
               success: true,
               message: 'Notification sent successfully',
@@ -37,7 +55,7 @@ export const handleNotifyTool = (args: unknown): Effect.Effect<CallToolResult, E
       return {
         content: [
           {
-            type: 'text',
+            type: 'text' as const,
             text: JSON.stringify({
               success: false,
               error: result.stderr,

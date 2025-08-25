@@ -48,7 +48,7 @@ export const validateAppleScriptInput = (input: unknown): Effect.Effect<AppleScr
       throw new Error('Message must be a non-empty string')
     }
     
-    const result: AppleScriptInput = {
+    const result: any = {
       title: obj.title.trim(),
       message: obj.message.trim()
     }
@@ -67,6 +67,6 @@ export const validateAppleScriptInput = (input: unknown): Effect.Effect<AppleScr
       result.sound = obj.sound.trim()
     }
     
-    return result
+    return result as AppleScriptInput
   })
 }
