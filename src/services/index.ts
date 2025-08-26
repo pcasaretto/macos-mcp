@@ -1,6 +1,6 @@
 import { Layer } from 'effect'
-import { NotificationServiceLive } from './notification.js'
-import { ClipboardServiceLive } from './clipboard.js'
+import { NotificationServiceLive } from './notification.ts'
+import { ClipboardServiceLive } from './clipboard.ts'
 
 /**
  * Auto-discovery of all service layers
@@ -37,5 +37,5 @@ export const allServices = serviceLayers.reduce(
 /**
  * Individual service exports for direct use if needed
  */
-export { NotificationServiceLive } from './notification.js'
-export { ClipboardServiceLive } from './clipboard.js'
+export { NotificationServiceLive } from './notification.ts'
+export { ClipboardServiceLive } from './clipboard.ts'

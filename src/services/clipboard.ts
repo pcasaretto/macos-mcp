@@ -1,7 +1,7 @@
 import { Context, Effect, Layer } from 'effect'
 import { execFile } from 'child_process'
 import { promisify } from 'util'
-import type { ClipboardCopyOutput, ClipboardPasteOutput, ClipboardClearOutput } from '../schemas/clipboard.js'
+import type { ClipboardCopyOutput, ClipboardPasteOutput, ClipboardClearOutput } from '../schemas/clipboard.ts'
 
 const execFileAsync = promisify(execFile)
 

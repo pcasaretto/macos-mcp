@@ -1,6 +1,6 @@
-import { createToolRegistry } from './registry.js'
-import { notificationTools } from './notification/index.js'
-import { clipboardTools } from './clipboard/index.js'
+import { createToolRegistry } from './registry.ts'
+import { notificationTools } from './notification/index.ts'
+import { clipboardTools } from './clipboard/index.ts'
 
 /**
  * All available tool groups in the MCP server
@@ -27,4 +27,4 @@ export const toolRegistry = createToolRegistry(toolGroups)
  * Convenience exports
  */
 export const { allTools } = toolRegistry
-export { findTool } from './registry.js'
+export { findTool } from './registry.ts'

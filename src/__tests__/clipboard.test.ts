@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest'
 import { Effect, Layer } from 'effect'
-import { handleCopyClipboardTool } from '../tools/clipboard/copy.js'
-import { handlePasteClipboardTool } from '../tools/clipboard/paste.js'
-import { handleClearClipboardTool } from '../tools/clipboard/clear.js'
-import { ClipboardService } from '../services/clipboard.js'
+import { handleCopyClipboardTool } from '../tools/clipboard/copy.ts'
+import { handlePasteClipboardTool } from '../tools/clipboard/paste.ts'
+import { handleClearClipboardTool } from '../tools/clipboard/clear.ts'
+import { ClipboardService } from '../services/clipboard.ts'
 
 const createMockClipboardService = (
   copyResult: any,

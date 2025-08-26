@@ -1,12 +1,12 @@
-import type { ToolGroup } from '../registry.js'
-import { handleCopyClipboardTool } from './copy.js'
-import { handlePasteClipboardTool } from './paste.js'
-import { handleClearClipboardTool } from './clear.js'
+import type { ToolGroup } from '../registry.ts'
+import { handleCopyClipboardTool } from './copy.ts'
+import { handlePasteClipboardTool } from './paste.ts'
+import { handleClearClipboardTool } from './clear.ts'
 import { 
   clipboardCopyInputToJsonSchema, 
   clipboardPasteInputToJsonSchema, 
   clipboardClearInputToJsonSchema 
-} from '../../schemas/clipboard.js'
+} from '../../schemas/clipboard.ts'
 
 export const clipboardTools: ToolGroup = {
   name: 'clipboard',

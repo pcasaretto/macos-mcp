@@ -1,6 +1,6 @@
 import { Effect } from 'effect'
 import { type CallToolResult } from '@modelcontextprotocol/sdk/types.js'
-import { NotificationService } from '../services/notification.js'
+import { NotificationService } from '../services/notification.ts'
 
 export const handleCheckEnvironmentTool = (): Effect.Effect<CallToolResult, Error, NotificationService> =>
   Effect.gen(function* (_) {

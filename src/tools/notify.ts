@@ -1,8 +1,8 @@
 import { Effect } from 'effect'
 import { Schema } from '@effect/schema'
 import { CallToolRequestSchema, type CallToolResult } from '@modelcontextprotocol/sdk/types.js'
-import { NotificationService } from '../services/notification.js'
-import { NotifyInputSchema } from '../schemas/notify.js'
+import { NotificationService } from '../services/notification.ts'
+import { NotifyInputSchema } from '../schemas/notify.ts'
 
 export const handleNotifyTool = (args: unknown): Effect.Effect<CallToolResult, Error, NotificationService> =>
   Effect.gen(function* (_) {

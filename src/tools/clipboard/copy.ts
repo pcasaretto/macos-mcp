@@ -1,8 +1,8 @@
 import { Effect } from 'effect'
 import { Schema } from '@effect/schema'
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js'
-import { ClipboardService } from '../../services/clipboard.js'
-import { ClipboardCopyInputSchema } from '../../schemas/clipboard.js'
+import { ClipboardService } from '../../services/clipboard.ts'
+import { ClipboardCopyInputSchema } from '../../schemas/clipboard.ts'
 
 export const handleCopyClipboardTool = (args: unknown): Effect.Effect<CallToolResult, Error, ClipboardService> =>
   Effect.gen(function* (_) {

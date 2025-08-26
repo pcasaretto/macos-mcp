@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { escapeAppleScriptString, buildDisplayNotificationScript } from '../services/applescript.js'
+import { escapeAppleScriptString, buildDisplayNotificationScript } from '../services/applescript.ts'
 
 describe('AppleScript utilities', () => {
   describe('escapeAppleScriptString', () => {

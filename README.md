@@ -7,13 +7,14 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that p
 - 🍎 **macOS Native Notifications**: Uses AppleScript's `display notification` for system-native notifications
 - 🛡️ **Type-Safe & Robust**: Built with Effect TS and comprehensive error handling
 - 🔒 **Rate Limited**: Prevents notification spam with configurable rate limiting (default: 5 per 10 seconds)
-- 🏗️ **Reproducible Builds**: Uses Nix flakes with dream2nix for reproducible dependency management
+- 🏗️ **Reproducible Builds**: Uses Nix flakes for reproducible dependency management
 - 📝 **MCP Compliant**: Implements the full MCP specification with proper tool definitions
 - ⚡ **Single Binary**: Compiles to a standalone executable for easy deployment
 
 ## Requirements
 
 - **macOS**: This server only works on macOS systems
+- **Node.js 24+**: Required for native TypeScript support
 - **osascript**: Must be available in PATH (comes with macOS)
 - **Nix** (for building): [Install Nix](https://nixos.org/download.html) with flakes enabled
 
@@ -43,14 +44,14 @@ nix run
 ### Manual Setup
 
 ```bash
-# Install Node.js 20+ and dependencies
+# Install Node.js 24+ and dependencies
 npm install
 
-# Build the project
-npm run build
+# Run the server directly (no build needed!)
+npm start
 
-# Run the server
-./dist/index.js
+# Or run TypeScript directly
+node --experimental-strip-types src/index.ts
 ```
 
 ## Tools
@@ -123,20 +124,20 @@ Add to your Claude Desktop configuration file:
 {
   "mcpServers": {
     "macos-notify": {
-      "command": "/path/to/mcp-macos",
-      "args": []
+      "command": "nix",
+      "args": ["run", "/path/to/macos-mcp#default"]
     }
   }
 }
 ```
 
-If using Nix:
+For development (local directory):
 ```json
 {
   "mcpServers": {
     "macos-notify": {
       "command": "nix",
-      "args": ["run", "/path/to/macos-mcp#default"]
+      "args": ["run", "."]
     }
   }
 }
@@ -150,11 +151,11 @@ Test the server interactively:
 # Install mcp-inspector
 npm install -g @modelcontextprotocol/inspector
 
-# Run with built binary
-npx @modelcontextprotocol/inspector /path/to/mcp-macos
-
-# Or with Nix
+# Run with Nix
 npx @modelcontextprotocol/inspector nix run /path/to/macos-mcp#default
+
+# Or from local directory
+npx @modelcontextprotocol/inspector nix run .
 ```
 
 ## Configuration
@@ -176,29 +177,34 @@ The server implements in-memory rate limiting to prevent notification spam:
 
 ```bash
 npm run dev          # Run in watch mode
-npm run build        # Build for production
+npm start           # Run the server directly
 npm test            # Run tests
 npm run test:run    # Run tests once
-npm run typecheck   # Type checking
-npm run clean       # Clean build artifacts
+npm run typecheck   # Type checking (no emission)
+npm run lint        # Run ESLint
 ```
 
 ### Project Structure
 
 ```
 src/
-├── index.ts              # CLI entrypoint
+├── index.ts              # CLI entrypoint (executable with Node 24)
 ├── server.ts             # MCP server implementation
 ├── services/
 │   ├── applescript.ts    # AppleScript utilities & escaping
-│   └── notification.ts   # NotificationService with Effect
+│   ├── clipboard.ts      # Clipboard operations
+│   ├── notification.ts   # NotificationService with Effect
+│   └── layer.ts          # Effect layers
 ├── tools/
 │   ├── notify.ts         # Notify tool handler
-│   └── check-env.ts      # Environment check tool
+│   ├── check-env.ts      # Environment check tool
+│   └── clipboard/        # Clipboard tool handlers
 ├── schemas/
-│   └── notify.ts         # Effect Schema definitions
+│   ├── notify.ts         # Notification schemas
+│   └── clipboard.ts      # Clipboard schemas
 └── __tests__/
     ├── applescript.test.ts  # AppleScript escaping tests
+    ├── clipboard.test.ts    # Clipboard tests
     └── tools.test.ts        # Tool integration tests
 ```
 
@@ -218,11 +224,11 @@ npm test    # Run all tests with Vitest
 
 ### Build System
 
-This project uses **dream2nix** for reproducible Node.js dependency management:
+This project uses **Nix flakes** with Node.js 24's native TypeScript support:
 
-- **Why dream2nix**: Better ESM support, simpler configuration, good package-lock.json handling
-- **Node version**: 22 (latest LTS with excellent ESM support)
-- **Bundle strategy**: Single-file bundle via tsup for smaller closure size
+- **Node version**: 24 (with `--experimental-strip-types` support)
+- **No build step**: TypeScript runs directly without transpilation
+- **Simple packaging**: Direct execution of source files
 
 ### Available Nix Commands
 
@@ -236,10 +242,10 @@ nix flake check     # Validate the flake
 ### Development Shell
 
 The `nix develop` shell provides:
-- Node.js 22
-- TypeScript tooling
-- Development utilities (jq, just)
-- All required build dependencies
+- Node.js 24 with native TypeScript support
+- TypeScript language server for IDE support
+- Development utilities (jq)
+- All required development dependencies
 
 ## Security & Safety
 
@@ -284,12 +290,12 @@ All operations use Effect TS for structured error handling:
 
 Enable verbose logging:
 ```bash
-DEBUG=1 ./mcp-macos
+DEBUG=1 nix run .
 ```
 
 Test notification manually:
 ```bash
-echo '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"notify","arguments":{"title":"Test","message":"Hello World"}},"id":1}' | ./mcp-macos
+echo '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"notify","arguments":{"title":"Test","message":"Hello World"}},"id":1}' | nix run .
 ```
 
 ## License

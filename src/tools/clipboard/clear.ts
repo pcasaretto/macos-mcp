@@ -1,6 +1,6 @@
 import { Effect } from 'effect'
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js'
-import { ClipboardService } from '../../services/clipboard.js'
+import { ClipboardService } from '../../services/clipboard.ts'
 
 export const handleClearClipboardTool = (): Effect.Effect<CallToolResult, Error, ClipboardService> =>
   Effect.gen(function* (_) {

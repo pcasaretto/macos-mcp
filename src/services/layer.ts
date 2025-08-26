@@ -1,5 +1,5 @@
 import { Layer } from 'effect'
-import { allServices } from './index.js'
+import { allServices } from './index.ts'
 
 /**
  * Central application layer that provides all services

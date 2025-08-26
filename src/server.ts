@@ -7,8 +7,8 @@ import {
   type CallToolResult,
   type Tool
 } from '@modelcontextprotocol/sdk/types.js'
-import { toolRegistry, findTool } from './tools/index.js'
-import { AppServiceLayer } from './services/layer.js'
+import { toolRegistry, findTool } from './tools/index.ts'
+import { AppServiceLayer } from './services/layer.ts'
 
 const createMCPServer = Effect.gen(function* (_) {
   const server = new Server(

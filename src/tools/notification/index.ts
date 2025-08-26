@@ -1,7 +1,7 @@
-import type { ToolGroup } from '../registry.js'
-import { handleNotifyTool } from '../notify.js'
-import { handleCheckEnvironmentTool } from '../check-env.js'
-import { notifyInputToJsonSchema } from '../../schemas/notify.js'
+import type { ToolGroup } from '../registry.ts'
+import { handleNotifyTool } from '../notify.ts'
+import { handleCheckEnvironmentTool } from '../check-env.ts'
+import { notifyInputToJsonSchema } from '../../schemas/notify.ts'
 
 export const notificationTools: ToolGroup = {
   name: 'notification',

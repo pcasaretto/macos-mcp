@@ -1,8 +1,8 @@
 import { Context, Effect, Layer, Ref, Schedule } from 'effect'
 import { execFile } from 'child_process'
 import { promisify } from 'util'
-import { buildDisplayNotificationScript } from './applescript.js'
-import type { NotifyInput, NotifyOutput, CheckEnvironmentOutput } from '../schemas/notify.js'
+import { buildDisplayNotificationScript } from './applescript.ts'
+import type { NotifyInput, NotifyOutput, CheckEnvironmentOutput } from '../schemas/notify.ts'
 
 const execFileAsync = promisify(execFile)
 

@@ -1,7 +1,7 @@
-#!/usr/bin/env node
+#!/usr/bin/env -S node --experimental-strip-types
 
 import { Effect, Runtime } from 'effect'
-import { runServer } from './server.js'
+import { runServer } from './server.ts'
 
 const main = Effect.gen(function* (_) {
   yield* _(runServer)

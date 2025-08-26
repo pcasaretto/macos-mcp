@@ -10,67 +10,75 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        nodejs = pkgs.nodejs_20;
+        nodejs = pkgs.nodejs_24;
         
-        # Import node2nix generated packages
-        nodePackages = import ./default.nix {
-          inherit pkgs system nodejs;
+        # Create a simple package that runs TypeScript directly
+        mcp-macos = pkgs.buildNpmPackage {
+          pname = "mcp-macos";
+          version = "0.1.0";
+          src = ./.;
+          
+          nodejs = pkgs.nodejs_24;
+          
+          npmDepsHash = "sha256-iFkLpxAgiytV+nSz1RkKrF7VkKKEd/UCGpyPjbTe+LM=";
+          
+          # No build phase needed - we run TypeScript directly
+          dontNpmBuild = true;
+          
+          installPhase = ''
+            runHook preInstall
+            
+            mkdir -p $out/lib/mcp-macos
+            cp -r . $out/lib/mcp-macos/
+            
+            # Create executable that runs TypeScript directly with Node 24
+            mkdir -p $out/bin
+            cat > $out/bin/mcp-macos << EOF
+            #!/bin/sh
+            cd $out/lib/mcp-macos
+            exec ${nodejs}/bin/node --experimental-strip-types src/index.ts "\$@"
+            EOF
+            chmod +x $out/bin/mcp-macos
+            
+            runHook postInstall
+          '';
         };
       in
       {
         packages = {
-          default = nodePackages.package.override {
-            src = ./.;
-            
-            buildInputs = [ nodejs ];
-            
-            postInstall = ''
-              # Build TypeScript
-              export HOME=$TMPDIR
-              npm run build
-              
-              # Create executable that bundles Node.js
-              mkdir -p $out/bin
-              cat > $out/bin/mcp-macos << EOF
-            #!/bin/sh
-            exec ${nodejs}/bin/node $out/lib/node_modules/mcp-macos/dist/index.js "\$@"
-            EOF
-              chmod +x $out/bin/mcp-macos
-            '';
-          };
+          default = mcp-macos;
         };
 
         apps = {
           default = {
             type = "app";
-            program = "${self.packages.${system}.default}/bin/mcp-macos";
+            program = "${mcp-macos}/bin/mcp-macos";
           };
         };
 
         devShells = {
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
-              nodejs_20
-              pkgs.nodePackages.npm
-              pkgs.nodePackages.node2nix
-              pkgs.nodePackages.typescript-language-server
-              pkgs.nodePackages.typescript
+              nodejs_24
+              nodePackages.npm
+              nodePackages.typescript-language-server
+              nodePackages.typescript
               jq
             ];
             
             shellHook = ''
               echo "🚀 MCP macOS development environment"
               echo "Node.js version: $(node --version)"
-              echo "NPM version: $(npm --version)"
+              echo "TypeScript native support: enabled"
               echo ""
               echo "Available commands:"
-              echo "  npm install         - Install dependencies"
-              echo "  npm run dev         - Run in development mode" 
-              echo "  npm test            - Run tests"
-              echo "  npm run build       - Build for production"
-              echo "  node2nix -l         - Regenerate node2nix files"
-              echo "  nix build           - Build portable binary"
-              echo "  nix run             - Run the server"
+              echo "  npm install                    - Install dependencies"
+              echo "  npm run dev                    - Run in development mode" 
+              echo "  npm test                       - Run tests"
+              echo "  npm run typecheck              - Type check without compilation"
+              echo "  node --experimental-strip-types src/index.ts  - Run directly"
+              echo "  nix build                      - Build portable binary"
+              echo "  nix run                        - Run the server"
               echo ""
               echo "Usage for Claude Desktop:"
               echo '  "command": "nix", "args": ["run", "${toString ./.}"]'

@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { Effect, Layer } from 'effect'
-import { handleNotifyTool } from '../tools/notify.js'
-import { handleCheckEnvironmentTool } from '../tools/check-env.js'
-import { NotificationService } from '../services/notification.js'
-import type { NotificationService as NotificationServiceType } from '../services/notification.js'
+import { handleNotifyTool } from '../tools/notify.ts'
+import { handleCheckEnvironmentTool } from '../tools/check-env.ts'
+import { NotificationService } from '../services/notification.ts'
+import type { NotificationService as NotificationServiceType } from '../services/notification.ts'
 
 const createMockNotificationService = (
   sendResult: any,
